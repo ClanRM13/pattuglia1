@@ -31,21 +31,24 @@
 
     /* ---------- CANVAS (mobile‑first) --------------------------------------*/
     canvas {
-      display: block;            /* remove line‑height gap */
-      width : 100vw;             /* fill width on phones */
-      height: 100vh;             /* fill height (landscape) */
-      aspect-ratio: 4 / 3;       /* keep 4:3 inside viewport */
-      object-fit: contain;       /* letterbox */
-    }
+  display: block;
+  width: 100vw;
+  height: auto;                 /* lascia che sia l’aspect‐ratio a calcolare l’altezza */
+  aspect-ratio: 4 / 3;          /* rapporto larghezza:altezza */
+  max-width: 100vw;
+  max-height: 100vh;
+  margin: 0 auto;
+}
 
-    /* Desktop / large tablets: cap canvas & center */
-    @media (min-width: 768px) {
-      canvas {
-        width : 800px;
-        height: 600px;
-        margin-inline: auto; /* center horizontally */
-      }
-    }
+@media (min-width: 768px) {
+  canvas {
+    width: 800px;               /* mantieni le dimensioni fisse su desktop */
+    height: auto;
+    aspect-ratio: 4 / 3;
+    max-height: 100vh;          /* ma comunque non più alto del viewport */
+  }
+}
+
 
     /* ---------- OVERLAYS ---------------------------------------------------*/
     #overlay,
@@ -398,7 +401,7 @@
             if (roverX + roverW > 0) requestAnimationFrame(animateRover);
             else {
               level++;
-              if (level > MAX_LEVEL) showOverlay('🎉 Complimenti!\nHai completato il gioco!', 0);
+              if (level > MAX_LEVEL) showOverlay('Complimenti!\nHai completato il gioco!', 0);
               else { resetLevel(); running = true; requestAnimationFrame(gameLoop); }
             }
           };
