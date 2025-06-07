@@ -2,470 +2,177 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <!-- Mobile‑first viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Scopri la tua pattuglia – Mobile First</title>
+  <title>Scopri la tua pattuglia – Mobile First</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    /* ---------- RESET / ROOT ------------------------------------------------*/
+    /* RESET / ROOT */
     *, *::before, *::after { box-sizing: border-box; }
     :root {
       --font-game: 'Press Start 2P', monospace;
       --clr-accent: #ffa500;
-      --clr-text   : #ff0;
-      --btn-size   : 16vw;   /* grows with viewport – tuned for thumbs */
-      --btn-size-max: 70px;  /* cap on tablets */
+      --clr-text  : #ff0;
+      --btn-size  : 16vw;
+      --btn-max   : 70px;
     }
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;   /* stretch to full safe area */
-      height: 100%;
-      background: #000; /* fallback while images load */
-      color: var(--clr-text);
-      font-family: var(--font-game);
-      overflow: hidden;    /* game uses full viewport */
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      background: #000; color: var(--clr-text);
+      font-family: var(--font-game); overflow: hidden;
     }
-
-    /* ---------- CANVAS (mobile‑first) --------------------------------------*/
     canvas {
-      display: block;            /* remove line‑height gap */
-      width : 100vw;             /* fill width on phones */
-      height: 100vh;             /* fill height (landscape) */
-      aspect-ratio: 4 / 3;       /* keep 4:3 inside viewport */
-      object-fit: contain;       /* letterbox */
+      display: block;
+      width: 100vw; height: 100vh;
+      aspect-ratio: 4/3;
+      object-fit: contain;
     }
-
-    /* Desktop / large tablets: cap canvas & center */
     @media (min-width: 768px) {
-      canvas {
-        width : 800px;
-        height: 600px;
-        margin-inline: auto; /* center horizontally */
-      }
+      canvas { width: 800px; height: 600px; margin: auto; }
     }
-
-    /* ---------- OVERLAYS ---------------------------------------------------*/
-    #overlay,
-    #rotateOverlay {
-      position: fixed;
-      inset: 0;               /* stretch full viewport */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2vw;
-      z-index: 99;            /* above everything */
-      font-family: var(--font-game);
+    #overlay, #rotateOverlay {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 2vw;
+      z-index: 99; font-family: var(--font-game);
       text-shadow: 2px 2px var(--clr-accent);
     }
-
     #overlay {
       backdrop-filter: blur(4px);
-      font-size: clamp(14px, 4vw, 20px);
       color: var(--clr-text);
+      font-size: clamp(14px,4vw,20px);
     }
-
     #rotateOverlay {
-      background: #000;        /* opaque so user focuses on message */
-      color: var(--clr-text);
-      font-size: 6vw;
-      display: none;           /* enabled via media query */
+      background: #000; color: var(--clr-text);
+      font-size: 6vw; display: none;
     }
-
-    #logo {
-      max-width: 60%;  /* a bit bigger on small screens */
-      margin-block-end: 3vh;
-    }
-
-    /* Show prompt when device is in portrait (game is landscape‑only) */
+    #logo { max-width: 60%; margin-bottom: 2vh; }
     @media (orientation: portrait) {
       canvas, #touchControls, #jumpBtn { display: none !important; }
-      #rotateOverlay           { display: flex;  }
+      #rotateOverlay { display: flex; }
     }
-
-    /* ---------- TOUCH CONTROLS (mobile‑first) ------------------------------*/
-    #touchControls {
-      position: fixed;
-      bottom: 8vh;
-      left  : 5vw;
-      display: flex;
-      gap: 5vw;
-      z-index: 3;
-    }
-    #jumpBtn {
-      position: fixed;
-      bottom: 8vh;
-      right : 5vw;
-      z-index: 3;
-    }
-    #touchControls button,
-    #jumpBtn {
-      width : var(--btn-size);
-      height: var(--btn-size);
-      max-width : var(--btn-size-max);
-      max-height: var(--btn-size-max);
-      font-size : 4vw;
-      border-radius: 12px;
-      border: 2px solid var(--clr-accent);
+    #touchControls { position: fixed; bottom: 8vh; left: 5vw; display: flex; gap: 5vw; z-index:3; }
+    #jumpBtn { position: fixed; bottom: 8vh; right:5vw; z-index:3; }
+    #touchControls button, #jumpBtn {
+      width: var(--btn-size); height: var(--btn-size);
+      max-width: var(--btn-max); max-height: var(--btn-max);
+      font-size:4vw; border-radius:12px;
+      border:2px solid var(--clr-accent);
       background: rgba(255,255,255,0.75);
-      box-shadow: 0 0 6px var(--clr-accent);
-      color: #000;
-      touch-action: none;  /* prevent scroll while playing */
+      box-shadow:0 0 6px var(--clr-accent);
+      color:#000; touch-action:none;
     }
-
-    /* Desktop: hide touch buttons */
-    @media (min-width: 768px) {
-      #touchControls, #jumpBtn { display: none; }
-    }
-
-    /* ---------- BACKGROUND IMAGE (menu) -----------------------------------*/
+    #touchControls button:active, #jumpBtn:active { transform: scale(0.9); }
+    @media (min-width:768px) { #touchControls, #jumpBtn { display:none; } }
     body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: url('backgroundmenu.png') center / cover no-repeat;
-      z-index: 1;
-      pointer-events: none;
+      content:""; position:fixed; inset:0;
+      background: url('backgroundmenu.png') center/cover no-repeat;
+      z-index:1; pointer-events:none;
     }
-    /* Hide menu backdrop once game starts */
-    body.game-started::before { display: none; }
+    body.game-started::before { display:none; }
   </style>
 </head>
 <body>
-  <!-- Rotate prompt for portrait orientation -->
   <div id="rotateOverlay">Ruota il dispositivo<br>in orizzontale per giocare!</div>
-
-  <!-- Main game canvas -->
   <canvas id="gameCanvas" width="800" height="600"></canvas>
-
-  <!-- Startup / victory / defeat overlay (hidden by default) -->
-  <div id="overlay" style="display:none; z-index:2;">
+  <div id="overlay" style="display:flex; z-index:2;">
     <img id="logo" src="logo.png" alt="Logo" />
     <div id="overlayText"></div>
   </div>
-
-  <!-- Touch buttons (visible mobile landscape) -->
   <div id="touchControls">
     <button id="leftBtn" aria-label="Muovi a sinistra">←</button>
     <button id="rightBtn" aria-label="Muovi a destra">→</button>
   </div>
   <button id="jumpBtn" aria-label="Salta">↑</button>
-
-  <!-- Audio -->
-  <audio id="bgMusic"   src="musica.mp3" loop></audio>
-  <audio id="hitSound"  src="bounch.mp3"></audio>
+  <audio id="bgMusic" src="musica.mp3" loop></audio>
+  <audio id="hitSound" src="bounch.mp3"></audio>
   <audio id="winnerSound" src="winner.mp3"></audio>
-
-  <!-- ---------------------------------------------------------------------
-       JavaScript – identico all'originale salvo piccole ottimizzazioni      
-       (nessun cambio logica, solo let invece di var, const preferito).      
-       Focus sulle modifiche CSS: il JS riconosce comunque i nuovi id.       
-  --------------------------------------------------------------------- -->
   <script>
     (() => {
-      const canvas  = document.getElementById('gameCanvas');
-      const ctx     = canvas.getContext('2d');
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
       const overlay = document.getElementById('overlay');
       const overlayText = document.getElementById('overlayText');
-      const logo    = document.getElementById('logo');
+      const logo = document.getElementById('logo');
       const hitSound = document.getElementById('hitSound');
+      const bgMusic = document.getElementById('bgMusic');
 
-      /* ------------------------------ ASSET PRELOAD ----------------------*/
-      const imgBackground   = new Image(); imgBackground.src = 'background.png';
-      const imgPlayerRight  = new Image(); imgPlayerRight.src = 'player.png';
-      const imgPlayerLeft   = new Image(); imgPlayerLeft.src = 'player2.png';
-      const imgScarpa       = new Image(); imgScarpa.src = 'scarpa.png';
-      const imgRover        = new Image(); imgRover.src = 'rover1.png';
+      const imgBackground = new Image(); imgBackground.src = 'background.png';
+      const imgPlayerRight = new Image(); imgPlayerRight.src = 'player.png';
+      const imgPlayerLeft = new Image(); imgPlayerLeft.src = 'player2.png';
+      const imgScarpa = new Image(); imgScarpa.src = 'scarpa.png';
+      const imgRover = new Image(); imgRover.src = 'rover1.png';
+      const bossLeftImages = [null, ...[1,2,3].map(i=>Object.assign(new Image(),{src:`boss${i===1?'1':''}2.png`}))];
+      const bossRightImages = [null, ...[1,2,3].map(i=>Object.assign(new Image(),{src:`boss${i}2.png`}))];
 
-      const bossLeftImages  = [null, new Image(), new Image(), new Image()];
-      const bossRightImages = [null, new Image(), new Image(), new Image()];
-      bossLeftImages[1].src  = 'boss12.png';
-      bossLeftImages[2].src  = 'boss2.png';
-      bossLeftImages[3].src  = 'boss3.png';
-      bossRightImages[1].src = 'boss1.png';
-      bossRightImages[2].src = 'boss22.png';
-      bossRightImages[3].src = 'boss32.png';
+      const GRAVITY = 0.6, JUMP_FORCE = 16;
+      let level=1, MAX_LEVEL=3;
+      let player, boss, scarpaAttiva=null, running=false;
 
-      /* ------------------------------ INPUT -----------------------------*/
-      const keys = {};
-      const keyDownHandler = e => {
-        keys[e.code] = true;
-        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))
-          e.preventDefault();
-      };
-      const keyUpHandler = e => { keys[e.code] = false; };
-      window.addEventListener('keydown', keyDownHandler);
-      window.addEventListener('keyup',   keyUpHandler);
-
-      /* Touch controls -> map to key flags */
-      const leftBtn  = document.getElementById('leftBtn');
-      const rightBtn = document.getElementById('rightBtn');
-      const jumpBtn  = document.getElementById('jumpBtn');
-
-      leftBtn.addEventListener('touchstart', () => keys['ArrowLeft'] = true);
-      leftBtn.addEventListener('touchend',   () => keys['ArrowLeft'] = false);
-      rightBtn.addEventListener('touchstart',() => keys['ArrowRight'] = true);
-      rightBtn.addEventListener('touchend',  () => keys['ArrowRight'] = false);
-      jumpBtn.addEventListener('touchstart', () => { if (player.onGround) keys['Space'] = true; });
-      jumpBtn.addEventListener('touchend',   () => keys['Space'] = false);
-
-      /* ------------------------------ GAME CONSTANTS --------------------*/
-      const GRAVITY    = 0.6;
-      const JUMP_FORCE = 16;
-
-      /* ------------------------------ ENTITIES --------------------------*/
       class Player {
-        constructor() {
-          this.w = 60; this.h = 90;
-          this.x = 100; this.y = canvas.height - this.h - 10;
-          this.vy = 0; this.speed = 5; this.onGround = false; this.direction = 'right';
-        }
-        update() {
-          if (keys['ArrowLeft']  && this.x > 0)                        { this.x -= this.speed; this.direction = 'left';  }
-          if (keys['ArrowRight'] && this.x + this.w < canvas.width)    { this.x += this.speed; this.direction = 'right'; }
-          if ((keys['ArrowUp'] || keys['Space']) && this.onGround)     { this.vy = -JUMP_FORCE; this.onGround = false; }
-
-          this.vy += GRAVITY;
-          this.y  += this.vy;
-          const groundY = canvas.height - this.h - 10;
-          if (this.y >= groundY) { this.y = groundY; this.vy = 0; this.onGround = true; }
-
-          keys['Space'] = false;   /* avoid holding jump */
-        }
-        draw() {
-          const img = (this.direction === 'left' ? imgPlayerLeft : imgPlayerRight);
-          if (img.complete && img.naturalWidth)
-            ctx.drawImage(img, this.x, this.y, this.w, this.h);
-          else {
-            ctx.fillStyle = 'lime';
-            ctx.fillRect(this.x, this.y, this.w, this.h);
-          }
-        }
+        constructor(){ this.w=60; this.h=90; this.x=100; this.y=canvas.height-this.h-10; this.vy=0; this.speed=5; this.onGround=false; this.direction='right'; }
+        update(){ if(keys['ArrowLeft']&&this.x>0){this.x-=this.speed; this.direction='left'} if(keys['ArrowRight']&&this.x+this.w<canvas.width){this.x+=this.speed; this.direction='right'} if((keys['ArrowUp']||keys['Space'])&&this.onGround){this.vy=-JUMP_FORCE; this.onGround=false} this.vy+=GRAVITY; this.y+=this.vy; const gy=canvas.height-this.h-10; if(this.y>=gy){this.y=gy; this.vy=0; this.onGround=true;} keys['Space']=false; }
+        draw(){ const img=this.direction==='left'?imgPlayerLeft:imgPlayerRight; if(img.complete) ctx.drawImage(img,this.x,this.y,this.w,this.h); else{ctx.fillStyle='lime';ctx.fillRect(this.x,this.y,this.w,this.h);} }
       }
-
       class Scarpa {
-        constructor(x, y, dir) {
-          this.w = 48; this.h = 48;
-          this.x = x - this.w/2; this.y = y - this.h/2;
-          this.dx = dir * 8 + (Math.random()*1.5 - 0.75);
-          this.dy = -10 + (Math.random()*1.5 - 0.75);
-          this.gravity = 0.2; this.active = true;
-        }
-        update() {
-          this.dy += this.gravity;
-          this.x  += this.dx;
-          this.y  += this.dy;
-          if (this.x < -this.w || this.x > canvas.width || this.y > canvas.height)
-            this.active = false;
-        }
-        draw() {
-          if (imgScarpa.complete && imgScarpa.naturalWidth)
-            ctx.drawImage(imgScarpa, this.x, this.y, this.w, this.h);
-          else {
-            ctx.fillStyle = 'brown';
-            ctx.fillRect(this.x, this.y, this.w, this.h);
-          }
-        }
-        collidesWith(p) {
-          return (
-            this.x           < p.x + p.w &&
-            this.x + this.w  > p.x     &&
-            this.y           < p.y + p.h &&
-            this.y + this.h  > p.y
-          );
-        }
+        constructor(x,y,dir){ this.w=48; this.h=48; this.x=x-this.w/2; this.y=y-this.h/2; this.dx=dir*8+(Math.random()*1.5-0.75); this.dy=-10+(Math.random()*1.5-0.75); this.gravity=0.2; this.active=true; }
+        update(){ this.dy+=this.gravity; this.x+=this.dx; this.y+=this.dy; if(this.x<-this.w||this.x>canvas.width||this.y>canvas.height) this.active=false; }
+        draw(){ if(imgScarpa.complete) ctx.drawImage(imgScarpa,this.x,this.y,this.w,this.h); else{ctx.fillStyle='brown';ctx.fillRect(this.x,this.y,this.w,this.h);} }
+        collidesWith(p){ return this.x<p.x+p.w&&this.x+this.w>p.x&&this.y<p.y+p.h&&this.y+this.h>p.y; }
       }
-
       class Boss {
-        constructor(level) {
-          this.level = level;
-          this.w = 150; this.h = 150;
-          this.x = canvas.width - this.w - 100;
-          this.y = canvas.height - this.h - 10;
-          this.dx = 2 + level; this.vy = 0; this.onGround = true;
-          this.maxHp = (level === 3 ? 3 : 3 + level);
-          this.hp = this.maxHp;
-          this.invincibleTimer = 0;
-          this.jumpCooldown = 0;
-          this.hitCount = 0;
+        constructor(l){ this.level=l; this.w=150; this.h=150; this.x=canvas.width-this.w-100; this.y=canvas.height-this.h-10; this.dx=2+l; this.vy=0; this.onGround=true; this.maxHp=(l===3?3:3+l); this.hp=this.maxHp; this.invincibleTimer=0; this.jumpCooldown=0; this.hitCount=0; }
+        update(){ this.x+=this.dx; if(this.x<=0||this.x+this.w>=canvas.width) this.dx*=-1; this.vy+=GRAVITY; this.y+=this.vy; const gy=canvas.height-this.h-10; if(this.y>=gy){this.y=gy; this.vy=0; this.onGround=true;} else this.onGround=false;
+          if(this.level===2&&this.onGround){ if(--this.jumpCooldown<=0){ this.vy=-12; this.jumpCooldown=120; }}
+          if(this.level===3){ if(Math.random()<0.01) this.dx*=-1; if(this.onGround&&Math.random()<0.02) this.vy=-12; }
+          if((this.level===1&&this.hp<=this.maxHp/2)||(this.hitCount>=(this.level===3?1:2))){ if(!scarpaAttiva){ const dir=this.dx<0?-1:1; scarpaAttiva=new Scarpa(this.x+this.w/2,this.y+this.h/2,dir); this.hitCount=0; }}
+          if(this.invincibleTimer>0) this.invincibleTimer--;
         }
-        update() {
-          /* Horizontal patrol */
-          this.x += this.dx;
-          if (this.x <= 0 || this.x + this.w >= canvas.width) this.dx *= -1;
-
-          /* Gravity / ground */
-          this.vy += GRAVITY;
-          this.y  += this.vy;
-          const groundY = canvas.height - this.h - 10;
-          if (this.y >= groundY) { this.y = groundY; this.vy = 0; this.onGround = true; }
-          else                   { this.onGround = false; }
-
-          /* Level‑specific behaviours */
-          if (this.level === 2 && this.onGround) {
-            if (--this.jumpCooldown <= 0) { this.vy = -12; this.jumpCooldown = 120; }
-          }
-          if (this.level === 3) {
-            if (Math.random() < 0.01) this.dx *= -1;   /* random direction */
-            if (this.onGround && Math.random() < 0.02) this.vy = -12; /* hop */
-          }
-
-          /* Throw scarpa when damaged */
-          if ((this.level === 1 && this.hp <= this.maxHp/2) || (this.hitCount >= (this.level === 3 ? 1 : 2))) {
-            if (scarpaAttiva === null) {
-              const dir = this.dx < 0 ? -1 : 1;
-              scarpaAttiva = new Scarpa(this.x + this.w/2, this.y + this.h/2, dir);
-              this.hitCount = 0;
-            }
-          }
-
-          if (this.invincibleTimer > 0) this.invincibleTimer--;
-        }
-        draw() {
-          const img = (this.dx < 0 ? bossLeftImages[this.level] : bossRightImages[this.level]);
-          if (img.complete && img.naturalWidth)
-            ctx.drawImage(img, this.x, this.y, this.w, this.h);
-          else {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(this.x, this.y, this.w, this.h);
-          }
-
-          /* HP bar */
-          const hpW = this.w * (this.hp / this.maxHp);
-          ctx.fillStyle = 'darkred'; ctx.fillRect(this.x, this.y - 10, this.w, 5);
-          ctx.fillStyle = 'lime';    ctx.fillRect(this.x, this.y - 10, hpW, 5);
-        }
+        draw(){ const img=this.dx<0?bossLeftImages[this.level]:bossRightImages[this.level]; if(img.complete) ctx.drawImage(img,this.x,this.y,this.w,this.h); else{ctx.fillStyle='red';ctx.fillRect(this.x,this.y,this.w,this.h);} const hpW=this.w*(this.hp/this.maxHp); ctx.fillStyle='darkred'; ctx.fillRect(this.x,this.y-10,this.w,5); ctx.fillStyle='lime'; ctx.fillRect(this.x,this.y-10,hpW,5); }
       }
 
-      /* ------------------------------ GAME STATE ------------------------*/
-      let level = 1, MAX_LEVEL = 3;
-      let player, boss, scarpaAttiva, running;
-      const resetLevel = () => {
-        player = new Player();
-        boss   = new Boss(level);
-        scarpaAttiva = null;
-      };
-      resetLevel();
+      function resetLevel(){ player=new Player(); boss=new Boss(level); scarpaAttiva=null; }
+      function showOverlay(text,dur=2000,cb,showLogo=false){ overlayText.textContent=text; overlay.style.display='flex'; logo.style.display=showLogo?'block':'none'; if(dur>0) setTimeout(()=>{ overlay.style.display='none'; cb&&cb(); },dur); }
+      function startGame(){ document.body.classList.add('game-started'); overlay.style.display='none'; running=true; requestAnimationFrame(gameLoop); }
+      function showVictory(){ const names={1:'Lorenzo P.',2:'Karim',3:'Lorenzo Cap.'}; imgRover.src=`rover${level}.png`; showOverlay(`Hai liberato ${names[level]}!`,2000,()=>{ let x=canvas.width+120; function anim(){ if(!running) return; if(imgBackground.complete) ctx.drawImage(imgBackground,0,0,canvas.width,canvas.height); player.draw(); boss.draw(); if(imgRover.complete) ctx.drawImage(imgRover,x,canvas.height-120,120,120); x-=5; if(x+120>0) requestAnimationFrame(anim); else{ level++; if(level>MAX_LEVEL) showOverlay('🎉 Complimenti!\nHai completato il gioco!',0); else{ resetLevel(); running=true; requestAnimationFrame(gameLoop);} } } requestAnimationFrame(anim); }); }
 
-      /* ------------------------------ COLLISIONS ------------------------*/
-      const collisionRect = (a,b) => (a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y);
+      function gameLoop(){ if(!running) return; if(imgBackground.complete) ctx.drawImage(imgBackground,0,0,canvas.width,canvas.height); player.update(); boss.update(); if(collision(player,boss)){ handleCollision(); } if(scarpaAttiva){ scarpaAttiva.update(); if(scarpaAttiva.collidesWith(player)){ running=false; showOverlay('Lo scarpone ti ha colpito!\nRiprova...',2000,()=>{ resetLevel(); running=true; requestAnimationFrame(gameLoop); }); } scarpaAttiva.draw(); if(!scarpaAttiva.active) scarpaAttiva=null; } player.draw(); boss.draw(); if(boss.hp<=0){ running=false; showVictory(); return; } requestAnimationFrame(gameLoop); }
+      function collision(a,b){ return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y; }
+      function handleCollision(){ const top=player.vy>0&&player.y+player.h-player.vy<=boss.y+10; if(top&&boss.invincibleTimer===0){ boss.hp--; boss.invincibleTimer=30; boss.hitCount++; player.vy=-JUMP_FORCE*0.8; player.y=boss.y-player.h-1; boss.dx=-Math.abs(boss.dx*1.1); hitSound.currentTime=0; hitSound.play().catch(()=>{});} else if(boss.invincibleTimer===0){ running=false; showOverlay('Sei stato sconfitto!\nRiprova...',2000,()=>{ resetLevel(); running=true; requestAnimationFrame(gameLoop); }); }}
 
-      const handlePlayerBossCollision = () => {
-        if (!collisionRect(player, boss)) return;
-        const topHit = (player.vy > 0 && player.y + player.h - player.vy <= boss.y + 10);
-        if (topHit && boss.invincibleTimer === 0) {
-          boss.hp--; boss.invincibleTimer = 30; boss.hitCount++;
-          player.vy = -JUMP_FORCE * 0.8; player.y = boss.y - player.h - 1;
-          boss.dx = -Math.abs(boss.dx * 1.1);
-          hitSound.currentTime = 0; hitSound.play().catch(()=>{});
-        } else if (!topHit && boss.invincibleTimer === 0) {
-          running = false;
-          showOverlay('Sei stato sconfitto!\nRiprova...', 2000, () => { resetLevel(); running = true; requestAnimationFrame(gameLoop); });
-        }
-      };
+      const keys={};
+      window.addEventListener('keydown',e=>{ keys[e.code]=true; if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault(); if(!running) startGame(); });
+      window.addEventListener('keyup',e=>keys[e.code]=false);
 
-      /* ------------------------------ OVERLAY HELPERS -------------------*/
-      const showOverlay = (text, duration = 2000, callback, showLogo = false) => {
-        overlayText.textContent = text;
-        overlay.style.display = 'flex';
-        logo.style.display    = showLogo ? 'block' : 'none';
-        if (duration > 0) {
-          setTimeout(() => {
-            overlay.style.display = 'none';
-            callback && callback();
-          }, duration);
-        }
-      };
+      ['touchstart','pointerdown'].forEach(evt=>{ window.addEventListener(evt,()=>{ if(!running) startGame(); },{once:true}); });
 
-      const showVictoryAndAdvance = () => {
-        winnerSound.play().catch(()=>{});
-        const names = {1: 'Lorenzo P.', 2: 'Karim', 3: 'Lorenzo Cap.'};
-        imgRover.src = `rover${level}.png`;
-        showOverlay(`Hai liberato ${names[level]}!`, 2000, () => {
-          let roverX = canvas.width + 120;
-          const roverY = canvas.height - 120, roverW = 120, roverH = 120;
-          running = true;
-          const animateRover = () => {
-            if (!running) return;
-            ctx.drawImage(imgBackground, 0, 0, canvas.width, canvas.height);
-            player.draw(); boss.draw();
-            if (imgRover.complete) ctx.drawImage(imgRover, roverX, roverY, roverW, roverH);
-            roverX -= 5;
-            if (roverX + roverW > 0) requestAnimationFrame(animateRover);
-            else {
-              level++;
-              if (level > MAX_LEVEL) showOverlay('🎉 Complimenti!\nHai completato il gioco!', 0);
-              else { resetLevel(); running = true; requestAnimationFrame(gameLoop); }
-            }
-          };
-          requestAnimationFrame(animateRover);
+      function setupTouchControls() {
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const jumpBtn = document.getElementById('jumpBtn');
+
+        leftBtn.addEventListener('touchstart', () => keys['ArrowLeft'] = true);
+        leftBtn.addEventListener('touchend', () => keys['ArrowLeft'] = false);
+
+        rightBtn.addEventListener('touchstart', () => keys['ArrowRight'] = true);
+        rightBtn.addEventListener('touchend', () => keys['ArrowRight'] = false);
+
+        jumpBtn.addEventListener('touchstart', () => {
+          keys['ArrowUp'] = true;
+          keys['Space'] = true;
         });
-      };
+        jumpBtn.addEventListener('touchend', () => {
+          keys['ArrowUp'] = false;
+          keys['Space'] = false;
+        });
+      }
 
-      /* ------------------------------ MAIN LOOP -------------------------*/
-      const gameLoop = () => {
-        if (!running) return;
-        ctx.drawImage(imgBackground, 0, 0, canvas.width, canvas.height);
-
-        player.update();
-        boss.update();
-        handlePlayerBossCollision();
-
-        if (scarpaAttiva) {
-          scarpaAttiva.update();
-          if (scarpaAttiva.collidesWith(player)) {
-            running = false;
-            showOverlay('Lo scarpone ti ha colpito!\nRiprova...', 2000, () => { resetLevel(); running = true; requestAnimationFrame(gameLoop); });
-          }
-          scarpaAttiva.draw();
-          if (!scarpaAttiva.active) scarpaAttiva = null;
-        }
-
-        player.draw();
-        boss.draw();
-
-        if (boss.hp <= 0) { running = false; showVictoryAndAdvance(); return; }
-        requestAnimationFrame(gameLoop);
-      };
-
-      /* ------------------------------ ASSET LOADING ---------------------*/
-      const assetsReady = () => (
-        imgPlayerRight.complete && imgPlayerLeft.complete &&
-        bossLeftImages[1].complete && bossLeftImages[2].complete && bossLeftImages[3].complete &&
-        bossRightImages[1].complete && bossRightImages[2].complete && bossRightImages[3].complete &&
-        imgBackground.complete && imgScarpa.complete && imgRover.complete && logo.complete
-      );
-
-      const waitAssetsThenStart = () => {
-        if (assetsReady()) {
-          document.body.classList.add('game-started');
-          overlay.style.display = 'none';
-          running = true;
-          requestAnimationFrame(gameLoop);
-        } else {
-          setTimeout(waitAssetsThenStart, 100);
-        }
-      };
-
-      /* Kick‑off: first key press starts */
-      window.addEventListener('keydown', () => {
-        const music = document.getElementById('bgMusic');
-        if (music && music.paused) music.play().catch(()=>{});
-        if (!running) waitAssetsThenStart();
-      }, { once: true });
-
-      showOverlay('Caricamento...');
-      const preloadCheck = setInterval(() => {
-        if (assetsReady()) {
-          clearInterval(preloadCheck);
-          showOverlay('Premi un tasto per iniziare\n← → per muoverti, Spazio/↑ per saltare', 0, null, true);
-        }
-      }, 100);
-
+      setupTouchControls();
+      resetLevel();
+      showOverlay('Tocca lo schermo o premi un tasto per iniziare\n← → per muoverti, Spazio/↑ per saltare', 0, true);
     })();
   </script>
 </body>
