@@ -6,12 +6,12 @@
   <title>Scopri la tua pattuglia!</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-    /* Rotate prompt for portrait mode */
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background:#000; }
+
+    /* Prompt di rotazione (mostrato solo in verticale) */
     #rotateOverlay {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      inset: 0;
       background: #000;
       color: #ff0;
       font-family: 'Press Start 2P', monospace;
@@ -23,47 +23,53 @@
       padding: 2vw;
       z-index: 99;
     }
-    @media screen and (orientation: portrait) {
+    @media (orientation: portrait) {
       canvas, #overlay, #touchControls, #jumpBtn { display: none !important; }
       #rotateOverlay { display: flex; }
     }
-    /* Canvas: maintain 4:3 aspect ratio and fit within viewport */
+
+    /* Canvas: verrà ridimensionato via JS per mantenere 4:3 */
     canvas {
       display: block;
       margin: 0 auto;
-      aspect-ratio: 4 / 3;
-      width: 100vw;
-      height: 100vh;
-      object-fit: contain;
+      max-width: 100vw;
+      max-height: 100vh;
+      width: 100%;     /* viene sovrascritto da resizeCanvas() */
+      height: auto;    /* idem */
+      image-rendering: pixelated;
+      background:#000; /* per bordi letterbox */
     }
+
+    /* Overlay testuale iniziale / di game‑over / di vittoria */
     #overlay {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      inset: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      font-size: 4vw;
+      font-size: clamp(12px,4vw,28px);
       color: #ff0;
       backdrop-filter: blur(4px);
       white-space: pre-line;
-      flex-direction: column;
       z-index: 2;
       font-family: 'Press Start 2P', monospace;
       text-shadow: 2px 2px #ffa500;
     }
     #logo { max-width: 30vw; margin-bottom: 2vh; display: none; }
+
+    /* Sfondo menu iniziale */
     body::before {
       content: "";
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      inset: 0;
       background: url('backgroundmenu.png') center/cover no-repeat;
       z-index: 1;
     }
     body.game-started::before { display: none; }
-    /* Touch controls: visible on mobile landscape */
+
+    /* Pulsanti touch: visibili in landscape su mobile */
     #touchControls {
       position: absolute;
       bottom: 8vh;
@@ -76,16 +82,17 @@
     #jumpBtn {
       width: 16vw;
       height: 16vw;
-      max-width: 70px;
-      max-height: 70px;
+      max-width: 80px;
+      max-height: 80px;
       font-size: 4vw;
       font-family: 'Press Start 2P', monospace;
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.8);
       border: 2px solid #ffa500;
       border-radius: 12px;
       box-shadow: 0 0 6px #ffa500;
       color: #000;
       touch-action: none;
+      user-select: none;
     }
     #jumpBtn {
       position: absolute;
@@ -94,6 +101,7 @@
       z-index: 3;
     }
   </style>
+</head>
 </head>
 <body>
   <div id="rotateOverlay">Ruota il dispositivo<br>in orizzontale per giocare!</div>
