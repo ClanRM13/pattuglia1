@@ -421,7 +421,18 @@ resizeGameArea();   // chiamata subito all’avvio
       }
       window.addEventListener('keydown',()=>{ const music=document.getElementById('bgMusic'); if(music && music.paused) music.play().catch(()=>{}); if (!running) waitAssetsThenStart(); },{once:true});
       showOverlay('Caricamento...');
-      const preloadCheck = setInterval(()=>{ if (assetsReady()) { clearInterval(preloadCheck); showOverlay('Premi un tasto per iniziare\n← → per muoverti, Spazio/↑ per saltare',0,null,true); } },100);
+
+const startTime = Date.now();
+
+const preloadCheck = setInterval(() => {
+  const elapsed = Date.now() - startTime;
+
+  if (assetsReady() && elapsed >= 5000) {
+    clearInterval(preloadCheck);
+    showOverlay('Premi un tasto per iniziare\n← → per muoverti, Spazio/↑ per saltare', 0, null, true);
+  }
+}, 100);
+
     })();
   </script>
 </body>
