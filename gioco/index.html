@@ -148,16 +148,36 @@
       });
       window.addEventListener('keyup', e => { keys[e.code] = false; });
 
-      // Touch controls
+      /* =============================================================
+         TOUCH / POINTER CONTROLS
+         ============================================================= */
       const leftBtn = document.getElementById('leftBtn');
       const rightBtn = document.getElementById('rightBtn');
       const jumpBtn = document.getElementById('jumpBtn');
-      leftBtn.addEventListener('touchstart', () => keys['ArrowLeft'] = true);
-      leftBtn.addEventListener('touchend', () => keys['ArrowLeft'] = false);
-      rightBtn.addEventListener('touchstart', () => keys['ArrowRight'] = true);
-      rightBtn.addEventListener('touchend', () => keys['ArrowRight'] = false);
-      jumpBtn.addEventListener('touchstart', () => { if (player.onGround) keys['Space'] = true; });
-      jumpBtn.addEventListener('touchend', () => keys['Space'] = false);
+
+      const setKey = (code, state) => { keys[code] = state; };
+
+      // movement buttons
+      leftBtn.addEventListener('touchstart', () => setKey('ArrowLeft', true));
+      leftBtn.addEventListener('touchend', () => setKey('ArrowLeft', false));
+      rightBtn.addEventListener('touchstart', () => setKey('ArrowRight', true));
+      rightBtn.addEventListener('touchend', () => setKey('ArrowRight', false));
+      jumpBtn.addEventListener('touchstart', () => { if (player.onGround) setKey('Space', true); });
+      jumpBtn.addEventListener('touchend',   () => setKey('Space', false));
+
+      /* =============================================================
+         NUOVO AVVIO ANCHE DA TOUCH
+         ============================================================= */
+      const startGameOnce = () => {
+        const music = document.getElementById('bgMusic');
+        if (music && music.paused) music.play().catch(() => {});
+        if (!running) waitAssetsThenStart();
+      };
+
+      // "once" garantisce che parta solo la prima volta
+      ['keydown', 'touchstart', 'pointerdown', 'mousedown'].forEach(evt => {
+        window.addEventListener(evt, startGameOnce, { once: true, passive: evt === 'touchstart' ? false : true });
+      });
 
       const GRAVITY = 0.6;
       const JUMP_FORCE = 16;
