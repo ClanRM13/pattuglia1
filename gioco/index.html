@@ -318,34 +318,13 @@ canvas {
         player = new Player(); boss = new Boss(level); scarpaAttiva = null;
       }
 
-    function showOverlay(
-  text,
-  {
-    duration   = 2000,   // ms   – se null/undefined niente auto‑hide
-    callback   = null,   // funzione da eseguire alla chiusura
-    showLogo   = false,  // se mostrare il logo
-    clickToHide = false  // chiusura su click/touch
-  } = {}
-) {
-  overlayText.textContent = text;
-  overlay.style.display   = 'flex';
-  overlay.style.cursor    = clickToHide ? 'pointer' : 'default';
-  logo.style.display      = showLogo ? 'block' : 'none';
-
-  // handler condiviso
-  const hide = () => {
-    overlay.style.display = 'none';
-    overlay.removeEventListener('click', hide);
-    if (callback) callback();
-  };
-
-  if (clickToHide) {
-    overlay.addEventListener('click', hide, { once: true });
-  } else if (duration != null && duration > 0) {
-    setTimeout(hide, duration);
-  }
-}
-
+      function showOverlay(text, duration=2000, callback, showLogo=false) {
+        overlayText.textContent = text;
+        overlay.style.display = 'flex'; logo.style.display = showLogo ? 'block' : 'none';
+        if (duration > 0) {
+          setTimeout(() => { overlay.style.display = 'none'; if (callback) callback(); }, duration);
+        }
+      }
 
       function showVictoryAndAdvance() {
         const winnerSound = document.getElementById('winnerSound'); if (winnerSound) winnerSound.play().catch(()=>{});
